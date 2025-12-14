@@ -276,6 +276,15 @@
   padding-bottom: env(safe-area-inset-bottom, 0);
 }
 
+.safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0);
+}
+
+/* Main content padding to account for bottom nav + safe area */
+.main-content {
+  padding-bottom: calc(4rem + env(safe-area-inset-bottom, 0) + 1rem);
+}
+
 /* Bottom Navigation Styles */
 .bottom-nav {
   background: var(--card);

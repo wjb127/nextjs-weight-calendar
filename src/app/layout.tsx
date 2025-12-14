@@ -49,7 +49,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-gray-50`}
       >
         <div className="mx-auto max-w-md min-h-screen bg-white">
-          <main className="pb-20">{children}</main>
+          <main className="main-content">{children}</main>
           <BottomNav />
         </div>
         <Toaster position="top-center" />
