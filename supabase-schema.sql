@@ -27,3 +27,11 @@ CREATE INDEX IF NOT EXISTS idx_weight_records_date ON weight_records(date);
 INSERT INTO settings (id, target_weight, height)
 VALUES (1, NULL, NULL)
 ON CONFLICT (id) DO NOTHING;
+
+-- Enable RLS (Row Level Security)
+-- API Routes use service_role key which bypasses RLS
+-- This blocks all direct access via anon key
+ALTER TABLE settings ENABLE ROW LEVEL SECURITY;
+ALTER TABLE weight_records ENABLE ROW LEVEL SECURITY;
+
+-- No policies = all direct access blocked (service_role bypasses RLS)
