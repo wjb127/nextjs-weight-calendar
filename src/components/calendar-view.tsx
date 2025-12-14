@@ -5,6 +5,7 @@ import Calendar from "react-calendar";
 import { WeightInputModal } from "./weight-input-modal";
 import { WeightRecord } from "@/types";
 import { toast } from "sonner";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import "react-calendar/dist/Calendar.css";
 
 type ValuePiece = Date | null;
@@ -16,8 +17,10 @@ export function CalendarView() {
   const [records, setRecords] = useState<Record<string, WeightRecord>>({});
   const [activeStartDate, setActiveStartDate] = useState(new Date());
   const [selectedRecord, setSelectedRecord] = useState<WeightRecord | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   const fetchRecords = useCallback(async (year: number, month: number) => {
+    setIsLoading(true);
     try {
       const response = await fetch(
         `/api/weights?year=${year}&month=${month}`
@@ -33,6 +36,8 @@ export function CalendarView() {
       }
     } catch (error) {
       console.error("Failed to fetch records:", error);
+    } finally {
+      setIsLoading(false);
     }
   }, []);
 
@@ -100,7 +105,7 @@ export function CalendarView() {
 
     if (record) {
       return (
-        <div className="text-xs font-semibold text-blue-600 mt-1">
+        <div className="weight-value">
           {record.weight}
         </div>
       );
@@ -123,8 +128,40 @@ export function CalendarView() {
     return className;
   };
 
+  // 이번 달 기록 수 계산
+  const currentMonthRecords = Object.keys(records).filter((date) => {
+    const recordDate = new Date(date);
+    return (
+      recordDate.getMonth() === activeStartDate.getMonth() &&
+      recordDate.getFullYear() === activeStartDate.getFullYear()
+    );
+  }).length;
+
   return (
     <div className="calendar-container">
+      {/* 월간 요약 */}
+      <div className="flex items-center justify-between mb-4 px-1">
+        <div>
+          <p className="text-sm text-muted-foreground">이번 달 기록</p>
+          <p className="text-2xl font-bold tabular-nums">
+            {isLoading ? (
+              <span className="inline-block w-8 h-8 skeleton rounded" />
+            ) : (
+              <>{currentMonthRecords}<span className="text-base font-normal text-muted-foreground ml-1">일</span></>
+            )}
+          </p>
+        </div>
+        <div className="text-right">
+          <p className="text-sm text-muted-foreground">오늘</p>
+          <p className="text-lg font-semibold">
+            {new Date().toLocaleDateString("ko-KR", {
+              month: "long",
+              day: "numeric",
+            })}
+          </p>
+        </div>
+      </div>
+
       <Calendar
         onChange={handleDateClick}
         value={selectedDate}
@@ -140,6 +177,11 @@ export function CalendarView() {
         minDetail="month"
         prev2Label={null}
         next2Label={null}
+        prevLabel={<ChevronLeft className="w-5 h-5" />}
+        nextLabel={<ChevronRight className="w-5 h-5" />}
+        navigationLabel={({ date }) =>
+          date.toLocaleDateString("ko-KR", { year: "numeric", month: "long" })
+        }
       />
 
       <WeightInputModal

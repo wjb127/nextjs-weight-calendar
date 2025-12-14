@@ -1,12 +1,12 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Settings as SettingsIcon, Target, Ruler, Download, Trash2, Loader2, CheckCircle } from "lucide-react";
 import { Settings } from "@/types";
 import { toast } from "sonner";
-import { Target, Ruler, Download, Trash2 } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -69,11 +69,18 @@ export default function SettingsPage() {
   };
 
   const calculateBMI = () => {
-    if (!settings?.height || !targetWeight) return null;
-    const heightM = settings.height / 100;
+    if (!height || !targetWeight) return null;
+    const heightM = parseFloat(height) / 100;
     const weight = parseFloat(targetWeight);
     if (heightM <= 0 || weight <= 0) return null;
     return Math.round((weight / (heightM * heightM)) * 10) / 10;
+  };
+
+  const getBMIStatus = (bmi: number) => {
+    if (bmi < 18.5) return { label: "저체중", color: "text-blue-500", bg: "bg-blue-50" };
+    if (bmi < 23) return { label: "정상", color: "text-green-500", bg: "bg-green-50" };
+    if (bmi < 25) return { label: "과체중", color: "text-yellow-500", bg: "bg-yellow-50" };
+    return { label: "비만", color: "text-red-500", bg: "bg-red-50" };
   };
 
   const handleExportCSV = async () => {
@@ -116,132 +123,171 @@ export default function SettingsPage() {
   };
 
   const handleResetData = async () => {
-    // 실제로는 모든 데이터 삭제 API가 필요하지만
-    // 여기서는 경고만 표시
     toast.error("이 기능은 아직 구현되지 않았습니다");
     setShowResetDialog(false);
   };
 
   const bmi = calculateBMI();
+  const bmiStatus = bmi ? getBMIStatus(bmi) : null;
 
   if (isLoading) {
     return (
-      <div className="p-4">
-        <h1 className="text-xl font-bold mb-4">설정</h1>
-        <div className="animate-pulse space-y-4">
-          <div className="h-40 bg-gray-200 rounded" />
-          <div className="h-40 bg-gray-200 rounded" />
+      <div className="p-4 pt-6">
+        <div className="flex items-center gap-3 mb-6">
+          <div className="p-2.5 bg-gradient-to-br from-slate-500 to-slate-700 rounded-xl">
+            <SettingsIcon className="w-6 h-6 text-white" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold">설정</h1>
+            <p className="text-sm text-muted-foreground">로딩 중...</p>
+          </div>
+        </div>
+        <div className="space-y-4">
+          <div className="h-48 skeleton rounded-2xl" />
+          <div className="h-32 skeleton rounded-2xl" />
         </div>
       </div>
     );
   }
 
   return (
-    <div className="p-4 space-y-4">
-      <h1 className="text-xl font-bold">설정</h1>
+    <div className="p-4 pt-6 space-y-4">
+      <div className="flex items-center gap-3 mb-6">
+        <div className="p-2.5 bg-gradient-to-br from-slate-500 to-slate-700 rounded-xl shadow-lg shadow-slate-500/25">
+          <SettingsIcon className="w-6 h-6 text-white" />
+        </div>
+        <div>
+          <h1 className="text-2xl font-bold">설정</h1>
+          <p className="text-sm text-muted-foreground">목표 및 프로필 관리</p>
+        </div>
+      </div>
 
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-base">프로필 설정</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
+      <Card className="rounded-2xl border-0 shadow-sm">
+        <CardContent className="p-5 space-y-5">
+          <h2 className="font-semibold flex items-center gap-2">
+            <Target className="w-4 h-4 text-primary" />
+            프로필 설정
+          </h2>
+
           <div className="space-y-2">
-            <label className="text-sm font-medium flex items-center gap-2">
-              <Target className="w-4 h-4" />
-              목표 몸무게 (kg)
+            <label className="text-sm font-medium text-muted-foreground">
+              목표 몸무게
             </label>
-            <Input
-              type="number"
-              step="0.1"
-              min="0"
-              placeholder="예: 65.0"
-              value={targetWeight}
-              onChange={(e) => setTargetWeight(e.target.value)}
-              className="tabular-nums"
-            />
+            <div className="relative">
+              <Input
+                type="number"
+                step="0.1"
+                min="0"
+                placeholder="65.0"
+                value={targetWeight}
+                onChange={(e) => setTargetWeight(e.target.value)}
+                className="tabular-nums text-lg h-12 pr-12 rounded-xl"
+              />
+              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground">
+                kg
+              </span>
+            </div>
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium flex items-center gap-2">
+            <label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
               <Ruler className="w-4 h-4" />
-              키 (cm)
+              키
             </label>
-            <Input
-              type="number"
-              step="0.1"
-              min="0"
-              placeholder="예: 175.0"
-              value={height}
-              onChange={(e) => setHeight(e.target.value)}
-              className="tabular-nums"
-            />
+            <div className="relative">
+              <Input
+                type="number"
+                step="0.1"
+                min="0"
+                placeholder="175.0"
+                value={height}
+                onChange={(e) => setHeight(e.target.value)}
+                className="tabular-nums text-lg h-12 pr-12 rounded-xl"
+              />
+              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground">
+                cm
+              </span>
+            </div>
           </div>
 
-          {bmi && (
-            <div className="p-3 bg-gray-50 rounded-lg">
-              <p className="text-sm text-gray-500">목표 BMI</p>
-              <p className="text-lg font-bold">{bmi}</p>
-              <p className="text-xs text-gray-400">
-                {bmi < 18.5
-                  ? "저체중"
-                  : bmi < 23
-                  ? "정상"
-                  : bmi < 25
-                  ? "과체중"
-                  : "비만"}
-              </p>
+          {bmi && bmiStatus && (
+            <div className={`p-4 rounded-xl ${bmiStatus.bg}`}>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-muted-foreground">목표 BMI</p>
+                  <p className="text-2xl font-bold tabular-nums">{bmi}</p>
+                </div>
+                <span className={`px-3 py-1 rounded-full text-sm font-semibold ${bmiStatus.color} ${bmiStatus.bg}`}>
+                  {bmiStatus.label}
+                </span>
+              </div>
             </div>
           )}
 
           <Button
             onClick={handleSave}
             disabled={isSaving}
-            className="w-full"
+            className="w-full h-12 rounded-xl bg-gradient-to-r from-primary to-blue-600 hover:from-primary/90 hover:to-blue-600/90"
           >
-            {isSaving ? "저장 중..." : "저장"}
+            {isSaving ? (
+              <Loader2 className="w-5 h-5 animate-spin" />
+            ) : (
+              <>
+                <CheckCircle className="w-5 h-5 mr-2" />
+                저장
+              </>
+            )}
           </Button>
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-base">데이터 관리</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3">
+      <Card className="rounded-2xl border-0 shadow-sm">
+        <CardContent className="p-5 space-y-3">
+          <h2 className="font-semibold mb-4">데이터 관리</h2>
+
           <Button
             variant="outline"
             onClick={handleExportCSV}
-            className="w-full justify-start"
+            className="w-full h-12 justify-start rounded-xl hover:bg-primary/5"
           >
-            <Download className="w-4 h-4 mr-2" />
-            CSV로 내보내기
+            <Download className="w-5 h-5 mr-3 text-primary" />
+            <div className="text-left">
+              <p className="font-medium">CSV로 내보내기</p>
+              <p className="text-xs text-muted-foreground">모든 기록을 파일로 저장</p>
+            </div>
           </Button>
 
           <Button
             variant="outline"
             onClick={() => setShowResetDialog(true)}
-            className="w-full justify-start text-red-500 hover:text-red-600 hover:bg-red-50"
+            className="w-full h-12 justify-start rounded-xl border-red-200 text-red-500 hover:bg-red-50 hover:text-red-600"
           >
-            <Trash2 className="w-4 h-4 mr-2" />
-            모든 데이터 삭제
+            <Trash2 className="w-5 h-5 mr-3" />
+            <div className="text-left">
+              <p className="font-medium">모든 데이터 삭제</p>
+              <p className="text-xs opacity-70">되돌릴 수 없습니다</p>
+            </div>
           </Button>
         </CardContent>
       </Card>
 
+      <p className="text-center text-xs text-muted-foreground pt-4">
+        Weight Calendar v1.0
+      </p>
+
       <Dialog open={showResetDialog} onOpenChange={setShowResetDialog}>
-        <DialogContent>
+        <DialogContent className="rounded-2xl">
           <DialogHeader>
-            <DialogTitle>정말 삭제하시겠습니까?</DialogTitle>
+            <DialogTitle className="text-red-500">정말 삭제하시겠습니까?</DialogTitle>
             <DialogDescription>
-              모든 몸무게 기록이 영구적으로 삭제됩니다. 이 작업은 되돌릴 수
-              없습니다.
+              모든 몸무게 기록이 영구적으로 삭제됩니다. 이 작업은 되돌릴 수 없습니다.
             </DialogDescription>
           </DialogHeader>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setShowResetDialog(false)}>
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={() => setShowResetDialog(false)} className="rounded-xl">
               취소
             </Button>
-            <Button variant="destructive" onClick={handleResetData}>
+            <Button variant="destructive" onClick={handleResetData} className="rounded-xl">
               삭제
             </Button>
           </DialogFooter>
