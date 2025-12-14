@@ -15,8 +15,18 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "몸무게 기록",
+  title: "몸무게 캘린더",
   description: "매일 몸무게를 기록하고 추이를 확인하세요",
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "몸무게",
+  },
+  icons: {
+    icon: "/icons/icon-192x192.png",
+    apple: "/icons/icon-192x192.png",
+  },
 };
 
 export const viewport: Viewport = {
@@ -25,6 +35,7 @@ export const viewport: Viewport = {
   maximumScale: 1,
   userScalable: false,
   viewportFit: "cover",
+  themeColor: "#3b82f6",
 };
 
 export default function RootLayout({
